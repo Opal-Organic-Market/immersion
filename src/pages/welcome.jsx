@@ -62,7 +62,7 @@ export default function Welcome() {
       <br></br>
       <br></br>
       <br></br>
-      <Link to="/AccueilTypedeviande">
+      <Link to="/accueilTypedeviandeLivraison">
         <CommençonsLesAchats />
       </Link>
     </div>

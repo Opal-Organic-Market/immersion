@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@material-ui/core';
+import { Card, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Image1 from '../assets/images/Image1.png';
 import Rawmeat from '../assets/images/rawmeat.png';
@@ -106,7 +106,7 @@ export default function AccueilTypedeviande() {
 
   return (
     <Box>
-      <typography className={classes.page}></typography>
+      <Typography className={classes.page}></Typography>
       <br></br>
       <br></br>
       <img src={Intrologo} alt="" className={classes.logo} />

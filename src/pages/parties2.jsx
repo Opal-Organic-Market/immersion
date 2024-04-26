@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AccueilParties2() {
   const styles = useStyles();
+  
 
   return (
     <Box className={styles.page} pb={8}>

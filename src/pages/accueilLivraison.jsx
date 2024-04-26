@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     gridTemplateColumns: 'repeat(2, 1fr)', 
     padding: '25px',
     gap: '10px',
+    
   },
   card: {
     width: '120px',
@@ -32,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '8px',
     padding: '10px',
     paddingBottom: '25px',
+    
   },
   content: {
     display: 'flex',
@@ -115,8 +117,9 @@ export default function AccueilTypedeviandeLivraison() {
           );
           productsData.push({ ...productData, id: doc.id, imageUrl });
         }
-        console.log("data", productsData);
+        console.log("not loading", productsData);
         setProducts(productsData);
+        console.log("product", productsData)
       } catch (error) {
         console.error("Error fetching data:", error);
       }

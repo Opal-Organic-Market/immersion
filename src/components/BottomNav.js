@@ -14,6 +14,9 @@ const useStyles = makeStyles((theme) => ({
     position: 'fixed',
     width: '100%',
     bottom: 0,
+    marginTop: "100px",
+
+    
   },
   root: {
     width: '100%',
