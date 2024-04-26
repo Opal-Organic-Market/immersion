@@ -23,6 +23,7 @@ import Header from "./header";
 
 function App() {
   const routesArray = [
+    { path: "/", element: <Login /> },
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Register /> },
     { path: "/intro", element: <Intro /> },

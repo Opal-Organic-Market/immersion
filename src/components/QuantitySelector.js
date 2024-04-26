@@ -1,16 +1,6 @@
-import React, { useEffect, useState } from "react";
+// QuantitySelector.js
+import React from "react";
 import { Button, TextField, makeStyles } from "@material-ui/core";
-import "../index.css";
-import { auth, db } from "../firebase/firebase";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
 
 const useStyles = makeStyles((theme) => ({
   quantitySelector: {
@@ -25,13 +15,11 @@ const useStyles = makeStyles((theme) => ({
     height: "36px",
     background: "#FFFFFF",
     border: "1px solid rgba(0, 0, 0, 0.1)",
-    borderRadius: "6px",
-  },
+    borderRadius: "6px",  },
   rule: {
     width: "1px",
     height: "36px",
-    background: "#D9D9D9",
-  },
+    background: "#D9D9D9",  },
   circle: {
     // position: 'absolute',
     left: "4.17%",
@@ -43,12 +31,10 @@ const useStyles = makeStyles((theme) => ({
     height: "20px",
     border: "1px solid black",
     borderRadius: "50%",
-    minWidth: "20px",
-  },
+    minWidth: "20px",  },
   plus: {
     fontWeight: "bold",
   },
-
   minus: {
     fontWeight: "bold",
   },
@@ -74,153 +60,35 @@ const useStyles = makeStyles((theme) => ({
     },
     "& .MuiInput-underline:after": {
       borderBottom: "none",
-    },
-  },
+    },  },
 }));
 
-function QuantitySelector() {
+function QuantitySelector({ item, onIncrement, onDecrement }) {
   const classes = useStyles();
-  const [checkout, setCheckout] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.log("User is not authenticated");
-          return;
-        }
-
-        // Fetch existing cart items from Firestore
-        const cartQuery = query(
-          collection(db, "addcart"),
-          where("userId", "==", user.uid)
-        );
-        const cartSnapshot = await getDocs(cartQuery);
-        const cartData = cartSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Update the checkout state
-        setCheckout(cartData);
-        console.log("cartdata", cartData);
-        // Calculate total price
-        let total = 0;
-        cartData.forEach((item) => {
-          total += item.quantity * item.price;
-        });
-        setTotalPrice(total);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [checkout]);
-
-  // const removeFromCart = async (itemId) => {
-  //   try {
-  //     await db.collection("addcart").doc(itemId).delete();
-  //     setCheckout((prevCheckout) =>
-  //       prevCheckout.filter((item) => item.id !== itemId)
-  //     );
-  //   } catch (error) {
-  //     console.error("Error removing from cart:", error);
-  //   }
-  // };
-
-  const handleIncrement = async (itemId) => {
-    try {
-      const itemRef = doc(db, "addcart", itemId);
-      const itemDoc = await getDoc(itemRef);
-      if (!itemDoc.exists()) {
-        console.log("Item does not exist in cart");
-        return;
-      }
-
-      const itemData = itemDoc.data();
-      const updatedQuantity = itemData.quantity + 1;
-
-      await updateDoc(itemRef, { quantity: updatedQuantity });
-
-      setCheckout((prevCheckout) =>
-        prevCheckout.map((item) =>
-          item.id === itemId ? { ...item, quantity: updatedQuantity } : item
-        )
-      );
-    } catch (error) {
-      console.error("Error incrementing quantity:", error);
-    }
-  };
-
-  const handleDecrement = async (itemId) => {
-    try {
-      const itemRef = doc(db, "addcart", itemId);
-      const itemDoc = await getDoc(itemRef);
-      if (!itemDoc.exists()) {
-        console.log("Item does not exist in cart");
-        return;
-      }
-
-      const itemData = itemDoc.data();
-      const updatedQuantity = itemData.quantity - 1;
-
-      if (updatedQuantity <= 0) {
-        await db.collection("addcart").doc(itemId).delete();
-        setCheckout((prevCheckout) =>
-          prevCheckout.filter((item) => item.id !== itemId)
-        );
-      } else {
-        await updateDoc(itemRef, { quantity: updatedQuantity });
-
-        setCheckout((prevCheckout) =>
-          prevCheckout.map((item) =>
-            item.id === itemId ? { ...item, quantity: updatedQuantity } : item
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error decrementing quantity:", error);
-    }
-  };
 
   return (
-    <div>
-      {checkout.map((item) => (
-        <div key={item.id}>
-          <div className={classes.quantitySelector}>
-            <Button
-              className={`${classes.circle} ${classes.minus}`}
-              onClick={() => handleDecrement(item.id)}
-            >
-              -
-            </Button>
-            <div className={classes.rule}></div>
-            <TextField
-              className={classes.number}
-              value={item.quantity}
-              type="number"
-              inputProps={{
-                style: {
-                  textAlign: "center",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                  color: "#252425",
-                },
-              }}
-            />
-            <div className={classes.rule}></div>
-            <Button
-              className={`${classes.circle} ${classes.plus}`}
-              onClick={() => handleIncrement(item.id)}
-            >
-              +
-            </Button>
-          </div>
-        </div>
-      ))}
+    <div className={classes.quantitySelector}>
+      <Button className={`${classes.circle} ${classes.minus}`} onClick={onDecrement}>
+        -
+      </Button>
+      <div className={classes.rule}></div>
+      <TextField
+        className={classes.number}
+        value={item.quantity}
+        type="number"
+        inputProps={{
+          style: {
+            textAlign: "center",
+            fontWeight: "700",
+            fontSize: "14px",
+            color: "#252425",
+          },
+        }}
+      />
+      <div className={classes.rule}></div>
+      <Button className={`${classes.circle} ${classes.plus}`} onClick={onIncrement}>
+        +
+      </Button>
     </div>
   );
 }

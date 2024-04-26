@@ -78,7 +78,7 @@ const useStyles = makeStyles({
   },
 });
 
-const PartsCard = ({ imageUrl, productName }) => {
+const PartsCard = ({ imageUrl, productName, onClick }) => {
   const classes = useStyles();
   const [isExpanded, setIsExpanded] = useState(false);
   const [state, setState] = useState('default');
@@ -88,6 +88,7 @@ const PartsCard = ({ imageUrl, productName }) => {
   };
 
   const handleClick = () => {
+    console.log('Clicked')
     if (state === 'default') {
       setState('added');
       setTimeout(() => setState('added'), 1);
@@ -120,7 +121,7 @@ const PartsCard = ({ imageUrl, productName }) => {
         {imageUrl && <img src={imageUrl} alt={productName} className={classes.image}/>}
       </div>
       <animated.div style={props}>
-        <Button onClick={handleClick} className={`${classes.button} ${buttonClass}`} endIcon={endIcon}>
+        <Button onClick={onClick} className={`${classes.button} ${buttonClass}`} endIcon={endIcon}>
           {productName}
         </Button>
       </animated.div>

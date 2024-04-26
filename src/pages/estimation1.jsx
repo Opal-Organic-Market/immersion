@@ -2,12 +2,8 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import QuantitySelector from "../components/QuantitySelector";
-import Poulet from "../assets/images/Poulet.jpg";
-import Poulet2 from "../assets/images/poulet2.png";
-import Payer from "../components/Payer";
-import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Link } from "react-router-dom";
-import { auth, db, storage } from "../firebase/firebase";
+import { auth, db } from "../firebase/firebase";
 import {
   collection,
   doc,
@@ -18,6 +14,8 @@ import {
   where,
 } from "firebase/firestore";
 import BottomNav from "../components/BottomNav";
+import { ArrowBack } from "@mui/icons-material";
+import Payer from "../components/Payer";
 
 const useStyles = makeStyles((theme) => ({
   page: {
@@ -87,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
   priceContainer: {
     display: "flex",
     alignItems: "center",
+    marginBottom: "100px",
     marginTop: "10px", // Add margin top for spacing
   },
   cefav: {
@@ -109,53 +108,47 @@ export default function Estimation1() {
   const [checkout, setCheckout] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.log("User is not authenticated");
-          return;
-        }
-
-        // Fetch existing cart items from Firestore
-        const cartQuery = query(
-          collection(db, "addcart"),
-          where("userId", "==", user.uid)
-        );
-        const cartSnapshot = await getDocs(cartQuery);
-        const cartData = cartSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Update the checkout state
-        setCheckout(cartData);
-        console.log("cartdata", cartData);
-        // Calculate total price
-        let total = 0;
-        cartData.forEach((item) => {
-          total += item.quantity * item.price;
-        });
-        setTotalPrice(total);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [checkout]);
-
-  const removeFromCart = async (itemId) => {
+  const fetchData = async () => {
     try {
-      await db.collection("addcart").doc(itemId).delete();
-      setCheckout((prevCheckout) =>
-        prevCheckout.filter((item) => item.id !== itemId)
+      const user = auth.currentUser;
+      if (!user) {
+        console.log("User is not authenticated");
+        return;
+      }
+
+      // Fetch existing cart items from Firestore
+      const cartQuery = query(
+        collection(db, "addcart"),
+        where("userId", "==", user.uid)
       );
+      const cartSnapshot = await getDocs(cartQuery);
+      const cartData = cartSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setCheckout(cartData);
+      console.log("data", cartData);
     } catch (error) {
-      console.error("Error removing from cart:", error);
+      console.error("Error fetching data:", error);
     }
   };
+
+  const calculateTotal = () => {
+    // Calculate total price
+    let total = 0;
+    checkout.forEach((item) => {
+      total += item.quantity * item.price;
+    });
+
+    setTotalPrice(total);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(calculateTotal, [checkout]);
 
   const handleIncrement = async (itemId) => {
     try {
@@ -180,6 +173,7 @@ export default function Estimation1() {
       console.error("Error incrementing quantity:", error);
     }
   };
+
   const handleDecrement = async (itemId) => {
     try {
       const itemRef = doc(db, "addcart", itemId);
@@ -213,8 +207,6 @@ export default function Estimation1() {
 
   return (
     <div className={styles.page}>
-      {" "}
-      {/* Add padding to the entire page */}
       <br></br>
       <br></br>
       <Link to="/AccueilParties2">
@@ -237,38 +229,31 @@ export default function Estimation1() {
           <div>
             <Typography className={styles.contentmain}>{item.name}</Typography>
             <div className={styles.container}>
-              <QuantitySelector />
-              <Typography className={styles.cefa}>{item.price * item.quantity}</Typography>
+              <QuantitySelector
+                item={item}
+                onIncrement={() => handleIncrement(item.id)}
+                onDecrement={() => handleDecrement(item.id)}
+              />
+              <Typography className={styles.cefa}>
+                {item.price * item.quantity}
+              </Typography>
             </div>
           </div>
         </div>
       ))}
       <br></br>
-      {/* <div>
-        <div className={styles.container}>
-          <img className={styles.layout} src={Poulet2} alt="Boeuf" />
-          <div>
-            <Typography className={styles.contentmain}>
-              Haut des cuisses
-            </Typography>
-            <div className={styles.container}>
-              <QuantitySelector />
-              <Typography className={styles.cefa}>14 000 FCFA</Typography>
-            </div>
-          </div>
-        </div>
-        <br></br>
-      </div> */}
       <Typography className={styles.cout}>Coût Total</Typography>
       <div className={styles.priceContainer}>
-        <Typography className={styles.cefav}>{totalPrice.toFixed(2)}</Typography>
+        <Typography className={styles.cefav}>
+          {totalPrice.toFixed(2)}
+        </Typography>
         <div className={styles.payerContainer}>
           <Link to="/estimation2">
             <Payer className={styles.payer} />
           </Link>
         </div>
       </div>
-      <BottomNav/>
+      <BottomNav />
     </div>
   );
 }

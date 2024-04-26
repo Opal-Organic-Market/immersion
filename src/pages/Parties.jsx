@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { db, auth, storage } from "../firebase/firebase";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { ref, getDownloadURL } from "firebase/storage";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Container, Box } from "@material-ui/core";
 import pouletthigh from "../assets/images/pouletthigh.png";
+import poulet from "../assets/images/Poulet.jpg";
 import poulet2 from "../assets/images/poulet2.png";
 import poulet3 from "../assets/images/poulet3.png";
-import AilesButton from "../components/AilesButton";
 import Continuer from "../components/Continuer";
-import { ArrowBack } from "@material-ui/icons";
-import BottomNav from "../components/BottomNav";
+import PartsCard from "../components/PartsCard"; // Import the PartsCard component
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import { auth, db, storage } from "../firebase/firebase";
+import { getDownloadURL, ref } from "firebase/storage";
 
 const useStyles = makeStyles((theme) => ({
   page: {
@@ -111,6 +117,7 @@ export default function AccueilParties() {
   }, []);
 
   const addToCart = async (category) => {
+    // console.log("function", addToCart)
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -127,14 +134,14 @@ export default function AccueilParties() {
         return;
       }
 
-      delete category.id;
+      // delete category.id;
       const categoryWithUserId = { ...category, quantity: 1, userId: user.uid };
-      const cartRef = await addDoc(
-        collection(db, "addcart"),
+      const cartRef = await setDoc(
+        doc(db, "addcart", category.id),
         categoryWithUserId
       );
 
-      console.log("Document written with ID: ", cartRef.id);
+      console.log("Document written with ID: ", cartRef);
 
       // Update the cart state using functional form of setCart
       setCart((prevCart) => [...prevCart, categoryWithUserId]);
@@ -147,12 +154,6 @@ export default function AccueilParties() {
 
   return (
     <Box className={styles.page} pb={8}>
-      {/* Add padding to the bottom */}
-      <br></br>
-      <br></br>
-      <Link to="/AccueilTypedeviandeLivraison">
-        <ArrowBack />
-      </Link>
       <br></br>
       <br></br>
       <br></br>
@@ -160,18 +161,19 @@ export default function AccueilParties() {
         Je désire du Poulet.
       </Typography>
       <br></br>
+
       <Typography className={styles.content}>
         Quelle partie voulez-vous ?
       </Typography>
+
       {categorys.map((category, index) => (
         <div key={index}>
           <Container className={styles.pouletthighContainer}>
-            <div>
-              <img src={category.image} alt={category.name} className={styles.pouletImage} />
-              <AilesButton onClick={addToCart(category)}> 
-              {category.name}
-              </AilesButton>
-            </div>
+            <PartsCard
+              imageUrl={category.image}
+              productName={category.name}
+              onClick={() => addToCart(category)}
+            />
           </Container>
         </div>
       ))}
@@ -179,13 +181,12 @@ export default function AccueilParties() {
       <br></br>
       <br></br>
       <br></br>
-      <Link to="/AccueilParties2">
+      <Link to="/estimation1">
         <Continuer />
       </Link>
       <br></br>
       <br></br>
       <br></br>
-      <BottomNav />
     </Box>
   );
 }
